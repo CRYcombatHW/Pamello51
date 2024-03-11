@@ -7,30 +7,19 @@ namespace Pamello51
 {
 	public class Program
 	{
-		public static Task Main() => new Program().MainAsync();
+		public static DiscordSocketClient Client;
 
-		public async Task MainAsync() {
-			using IHost host = Host.CreateDefaultBuilder()
-				.ConfigureServices((_, services) =>
-				services.AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig {
-					GatewayIntents = GatewayIntents.All,
-					AlwaysDownloadUsers = true
-				}))).Build();
+		public static async Task Main(string[] args) {
+			Client = new DiscordSocketClient(new DiscordSocketConfig {
+				GatewayIntents = GatewayIntents.All,
+				AlwaysDownloadUsers = true
+			});
 
-			await RunAsync(host);
-		}
+			Client.Log += async (message) => Console.WriteLine($"[log] {message}");
+			Client.Ready += async () => Console.WriteLine($"{Client.CurrentUser.Username} Ready");
 
-		public async Task RunAsync(IHost host) {
-			using IServiceScope serviceScope = host.Services.CreateScope();
-			IServiceProvider provider = serviceScope.ServiceProvider;
-
-			DiscordSocketClient client = provider.GetRequiredService<DiscordSocketClient>();
-
-			client.Log += async (message) => Console.WriteLine($"[log] {message}");
-			client.Ready += async () => Console.WriteLine($"{client.CurrentUser.Username} Ready");
-
-			await client.LoginAsync(TokenType.Bot, "MTIxNjY4MjEwMjU3NDI4NDg4MQ.GHxEGe.G4Fx0OyiFytvog1GRKU5l-2LRT7ai9blMKI6aY");
-			await client.StartAsync();
+			await Client.LoginAsync(TokenType.Bot, "");
+			await Client.StartAsync();
 
 			await Task.Delay(-1);
 		}
